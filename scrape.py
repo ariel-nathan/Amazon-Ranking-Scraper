@@ -12,6 +12,7 @@ productList = []
 colNames = ['asin', 'title', 'price', 'category rank 1', 'category rank 1 label', 'category rank 2', 'category rank 2 label', 'category rank 3', 'category rank 3 label', 'date']
 x = 0
 i = 1
+errorCount = 0
 
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
 
@@ -82,4 +83,10 @@ def processing(i, x):
         print("All items processed")
 
 for asin in asinlist:
-    getAsinData(asin)
+    try:
+        getAsinData(asin)
+    except:
+        errorCount += 1
+        print("Error on Parent ASIN: " + asin + "\nSkipping to next ASIN")
+        print("# of Errors caught: " + str(errorCount))
+        pass
