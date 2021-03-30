@@ -4,16 +4,21 @@ import re
 from config import *
 from datetime import date, datetime
 from urllib.request import urlopen
+
 i = 1
 errorCount = 0
+remainingRequests = 0
 
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
 
 def getAsinData(asin):
-    global i
+    global remainingRequests
     
     handler = urlopen(url + asin)
     productData = json.loads(handler.read())
+
+    remainingRequests = productData['remaining_requests']
+    print("Remaining API Calls: " + str(remainingRequests))
 
     productInfo = productData['body']['productInformation']
 
