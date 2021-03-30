@@ -74,16 +74,16 @@ def getAsinData(asin):
 
     return(product)
 
-for asin in asinlist:
-    try:
-        print("Processing ASIN: " + asin)
-        getAsinData(asin)
-    except Exception as e:
-        errorCount += 1
-        print("Error on Parent ASIN: " + asin)
-        pass
-    finally:
-        print("Processing Done on ASIN: " + asin + " | " + str(i) + " out of " + str(x))
-        if (i == x):
-            print("All items processed")
-        i += 1
+#for asin in asinlist:
+    #try:
+    #    print("Processing ASIN: " + asin)
+    #    getAsinData(asin)
+    #except Exception as e:
+    #    errorCount += 1
+    #    print("Error on Parent ASIN: " + asin)
+    #    pass
+    #finally:
+    #    print("Processing Done on ASIN: " + asin + " | " + str(i) + " out of " + str(x))
+    #    if (i == x):
+    #        print("All items processed")
+    #    i += 1
