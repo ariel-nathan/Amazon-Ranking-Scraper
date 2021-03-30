@@ -76,6 +76,7 @@ with open('asins.csv', 'r') as f:
         except Exception as e:
             errorCount += 1
             print("Error on Parent ASIN: " + (asin[0]))
+            print("Error: " + str(e))
             pass
         finally:
             print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
