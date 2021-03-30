@@ -28,16 +28,18 @@ def getAsinData(asin):
 
     catLabel1 = productRank[productRank.index("in"):productRank.index("(") - 1]
     z = productRank.index(')') + productRank[productRank.index(')'):].index('in')
-    catLabel2 = productRank[z:]
 
     productRank = productRank.replace('100','')
     temp = re.findall(r'\d+', productRank.replace(',',''))
     res = list(map(int, temp))
 
     if len(res) == 2:
+        catLabel2 = productRank[z:]
         res.append(None)
         catLabel3 = None
     else: 
+        y = productRank[z:].index('#') - 1
+        catLabel2 = productRank[z:y+z]
         n = productRank.index(')') + productRank[productRank.index(')'):].index('in') + 1
         catLabel3 = productRank[n + productRank[n:].index('in'):]
 
@@ -68,15 +70,15 @@ with open('asins.csv', 'r') as f:
     reader = csv.reader(f)   
 
     for asin in reader:
-        try:
+        #try:
             print("Processing ASIN: " + asin[0])
             getAsinData(asin[0])
-        except Exception as e:
-            errorCount += 1
-            print("Error on Parent ASIN: " + (asin[0]))
-            pass
-        finally:
-            print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
-            if (i == x):
-                print("All items processed")
-            i += 1
+        #except Exception as e:
+            #errorCount += 1
+            #print("Error on Parent ASIN: " + (asin[0]))
+            #pass
+        #finally:
+            #print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
+            #if (i == x):
+            #    print("All items processed")
+            #i += 1
