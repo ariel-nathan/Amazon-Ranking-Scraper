@@ -72,21 +72,18 @@ def getAsinData(asin):
         writer = csv.DictWriter(csvfile, fieldnames = colNames)
         writer.writerow(product)
 
-    processing(i, x)
-    i += 1
-
     return(product)
-
-def processing(i, x):  
-    print("Processed " + str(i) + " out of " + str(x))
-    if (i == x):
-        print("All items processed")
 
 for asin in asinlist:
     try:
+        print("Processing ASIN: " + asin)
         getAsinData(asin)
-    except:
+    except Exception as e:
         errorCount += 1
-        print("Error on Parent ASIN: " + asin + "\nSkipping to next ASIN")
-        print("# of Errors caught: " + str(errorCount))
+        print("Error on Parent ASIN: " + asin)
         pass
+    finally:
+        print("Processing Done on ASIN: " + asin + " | " + str(i) + " out of " + str(x))
+        if (i == x):
+            print("All items processed")
+        i += 1
