@@ -70,15 +70,15 @@ with open('asins.csv', 'r') as f:
     reader = csv.reader(f)   
 
     for asin in reader:
-        #try:
+        try:
             print("Processing ASIN: " + asin[0])
             getAsinData(asin[0])
-        #except Exception as e:
-            #errorCount += 1
-            #print("Error on Parent ASIN: " + (asin[0]))
-            #pass
-        #finally:
-            #print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
-            #if (i == x):
-            #    print("All items processed")
-            #i += 1
+        except Exception as e:
+            errorCount += 1
+            print("Error on Parent ASIN: " + (asin[0]))
+            pass
+        finally:
+            print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
+            if (i == x):
+                print("All items processed")
+            i += 1
