@@ -1,30 +1,13 @@
 import csv
 import json
 import re
-from config import apiToken
-from datetime import date
+from config import *
+from datetime import date, datetime
 from urllib.request import urlopen
-
-today = date.today()
-csvName = "Ranking Tracker " + str(today) + ".csv"
-asinlist = []
-productList = []
-colNames = ['asin', 'title', 'price', 'category rank 1', 'category rank 1 label', 'category rank 2', 'category rank 2 label', 'category rank 3', 'category rank 3 label', 'date']
-x = 0
 i = 1
 errorCount = 0
 
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
-
-with open(csvName, 'w', newline='') as csvfile: 
-    writer = csv.DictWriter(csvfile, fieldnames = colNames)
-    writer.writeheader()
-
-with open('asins.csv', 'r') as f:
-    reader = csv.reader(f)
-    for row in reader:
-        asinlist.append(row[0])
-        x += 1
 
 def getAsinData(asin):
     global i
@@ -54,36 +37,41 @@ def getAsinData(asin):
         catLabel3 = productRank[n + productRank[n:].index('in'):]
 
     product = {
+    'parent-asin': asin,
     'asin': productData['body']['productInformation'][3]['value'],
     'title': productData['body']['name'],
+    'category': productData['body']['breadCrumbs'][-1]['name'],
     'price': productData['body']['price'],
+    'main-image': productData['body']['mainImage'],
     'category rank 1': res[0],
     'category rank 1 label': catLabel1,
     'category rank 2': res[1],
     'category rank 2 label':  catLabel2,
     'category rank 3': res[2],
     'category rank 3 label': catLabel3,
-    'date': today
+    'date': datetime.now()
     }
 
-    productList.append(product)
+    print("Adding Record to Database")
+    collection.insert_one(product)
 
-    with open(csvName, 'a', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames = colNames)
-        writer.writerow(product)
+with open('asins.csv', 'r') as f:
+    reader = csv.reader(f)
+    x = len(list(reader))
 
-    return(product)
+with open('asins.csv', 'r') as f:
+    reader = csv.reader(f)   
 
-#for asin in asinlist:
-    #try:
-    #    print("Processing ASIN: " + asin)
-    #    getAsinData(asin)
-    #except Exception as e:
-    #    errorCount += 1
-    #    print("Error on Parent ASIN: " + asin)
-    #    pass
-    #finally:
-    #    print("Processing Done on ASIN: " + asin + " | " + str(i) + " out of " + str(x))
-    #    if (i == x):
-    #        print("All items processed")
-    #    i += 1
+    for asin in reader:
+        try:
+            print("Processing ASIN: " + asin[0])
+            getAsinData(asin[0])
+        except Exception as e:
+            errorCount += 1
+            print("Error on Parent ASIN: " + (asin[0]))
+            pass
+        finally:
+            print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
+            if (i == x):
+                print("All items processed")
+            i += 1
