@@ -6,6 +6,7 @@ from datetime import date, datetime
 from urllib.request import urlopen
 
 i = 1
+asinList = []
 errorCount = 0
 remainingRequests = 0
 
@@ -22,26 +23,31 @@ def getAsinData(asin):
 
     productInfo = productData['body']['productInformation']
 
-    for z in productInfo:
-        if (z['name'] == "Best Sellers Rank"):
-            productRank = z['value']
+    for info in productInfo:
+        if (info['name'] == "Best Sellers Rank"):
+            productRank = info['value']
 
     catLabel1 = productRank[productRank.index("in"):productRank.index("(") - 1]
-    z = productRank.index(')') + productRank[productRank.index(')'):].index('in')
+    tempz = productRank.index(')') + productRank[productRank.index(')'):].index('in')
 
     productRank = productRank.replace('100','')
-    temp = re.findall(r'\d+', productRank.replace(',',''))
-    res = list(map(int, temp))
+    tempx = re.findall(r'\d+', productRank.replace(',',''))
+    res = list(map(int, tempx))
 
     if len(res) == 2:
-        catLabel2 = productRank[z:]
+        catLabel2 = productRank[tempz:]
         res.append(None)
         catLabel3 = None
-    else: 
-        y = productRank[z:].index('#') - 1
-        catLabel2 = productRank[z:y+z]
-        n = productRank.index(')') + productRank[productRank.index(')'):].index('in') + 1
-        catLabel3 = productRank[n + productRank[n:].index('in'):]
+    elif len(res) > 2: 
+        tempy = productRank[tempz:].index('#') - 1
+        catLabel2 = productRank[tempz:tempy+tempz]
+        tempn = productRank.index(')') + productRank[productRank.index(')'):].index('in') + 1
+        catLabel3 = productRank[tempn + productRank[tempn:].index('in'):]
+    else:
+        res.append(None)
+        res.append(None)
+        catLabel2 = None
+        catLabel3 = None
 
     product = {
     'parent-asin': asin,
@@ -62,24 +68,34 @@ def getAsinData(asin):
     print("Adding Record to Database")
     collection.insert_one(product)
 
-with open('asins.csv', 'r') as f:
-    reader = csv.reader(f)
-    x = len(list(reader))
-
-with open('asins.csv', 'r') as f:
-    reader = csv.reader(f)   
-
-    for asin in reader:
+def process(asinList):
+    global i
+    x = len(asinList)
+    global errorCount
+    for asin in asinList:
         try:
             print("Processing ASIN: " + asin[0])
             getAsinData(asin[0])
         except Exception as e:
             errorCount += 1
-            print("Error on Parent ASIN: " + (asin[0]))
+            print("Error on Parent ASIN: " + asin[0])
             print("Error: " + str(e))
             pass
         finally:
-            print("Processing Done on ASIN: " + (asin[0]) + " | " + str(i) + " out of " + str(x))
+            print("Processing Done on ASIN: " + asin[0] + " | " + str(i) + " out of " + str(x) + "\n")
             if (i == x):
                 print("All items processed")
+                if (errorCount > 0):
+                    print(str(errorCount) + " Errors Caught")
             i += 1
+
+with open('asins.csv', 'r') as f:
+    reader = csv.reader(f)
+
+    for asin in reader:
+        asinList.append(asin)
+
+#To process all asins on list
+process(asinList)
+#To process a single asin in case of error
+#process([["B08NWGF4XB"]])
