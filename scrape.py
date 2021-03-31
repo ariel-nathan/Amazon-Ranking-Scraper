@@ -1,12 +1,14 @@
 import csv
 import json
 import re
+import os
 from config import *
 from datetime import date, datetime
 from urllib.request import urlopen
 
 i = 1
 asinList = []
+errorList = [['Parent-ASIN', 'Error']]
 errorCount = 0
 remainingRequests = 0
 
@@ -70,8 +72,9 @@ def getAsinData(asin):
 
 def process(asinList):
     global i
-    x = len(asinList)
     global errorCount
+    x = len(asinList)
+
     for asin in asinList:
         try:
             print("Processing ASIN: " + asin[0])
@@ -80,6 +83,7 @@ def process(asinList):
             errorCount += 1
             print("Error on Parent ASIN: " + asin[0])
             print("Error: " + str(e))
+            errorList.append([asin[0], str(e)])
             pass
         finally:
             print("Processing Done on ASIN: " + asin[0] + " | " + str(i) + " out of " + str(x) + "\n")
@@ -87,7 +91,32 @@ def process(asinList):
                 print("All items processed")
                 if (errorCount > 0):
                     print(str(errorCount) + " Errors Caught")
+                    with open('errors.csv', 'w', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerows(errorList)
+                    print("Errors logged to errors.csv\n")
+                    errorAsk(errorList)
+                else:
+                    try:
+                        os.remove('errors.csv')
+                    except:
+                        pass
             i += 1
+
+def processErrors(errorList):
+    errorList.pop(0)
+    errorList = [(a) for a, b in errorList]
+    process([errorList])
+
+def errorAsk(errorList):
+    choice = input("Would you like to retry the ASINs with Errors? (y/n): ")
+    if (choice == "y" or choice == "Y"):
+        processErrors(errorList)
+    elif (choice == "n" or choice == "N"):
+        print("Ok, program completed")
+    else:
+        print("Error: Invalid Input")
+    
 
 with open('asins.csv', 'r') as f:
     reader = csv.reader(f)
