@@ -88,7 +88,6 @@ def process(asinList):
         finally:
             print("Processing Done on ASIN: " + asin[0] + " | " + str(i) + " out of " + str(x) + "\n")
             if (i == x):
-                print("All items processed")
                 if (errorCount > 0):
                     print(str(errorCount) + " Errors Caught")
                     with open('errors.csv', 'w', newline='') as f:
@@ -98,6 +97,7 @@ def process(asinList):
                     errorAsk(errorList)
                 else:
                     try:
+                        print("All items processed succesfully")
                         os.remove('errors.csv')
                     except:
                         pass
@@ -124,7 +124,7 @@ with open('asins.csv', 'r') as f:
     for asin in reader:
         asinList.append(asin)
 
-#To process all asins on list
+#To process all asins in csv
 process(asinList)
-#To process a single asin in case of error
+#To process a single asin fot troubleshooting
 #process([["B08NWGF4XB"]])
