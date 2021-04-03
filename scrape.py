@@ -2,7 +2,7 @@ import csv
 import json
 import re
 import os
-from config import *
+from config import apiToken, collection
 from datetime import date, datetime
 from urllib.request import urlopen
 
@@ -106,12 +106,14 @@ def process(asinList):
 def processErrors(errorList):
     errorList.pop(0)
     errorList = [(a) for a, b in errorList]
+    print(errorList)
     process([errorList])
 
 def errorAsk(errorList):
     choice = input("Would you like to retry the ASINs with Errors? (y/n): ")
     if (choice == "y" or choice == "Y"):
         processErrors(errorList)
+        i = 1
     elif (choice == "n" or choice == "N"):
         print("Ok, program completed")
     else:
@@ -127,4 +129,4 @@ with open('asins.csv', 'r') as f:
 #To process all asins in csv
 process(asinList)
 #To process a single asin fot troubleshooting
-#process([["B08NWGF4XB"]])
+#process([["B0915KV169"]])
