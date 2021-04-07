@@ -1,22 +1,43 @@
+import os
+import re
 import csv
 import json
-import re
-import os
+from urllib.request import urlopen
 from config import apiToken, collection
 from datetime import date, datetime
-from urllib.request import urlopen
 
-i = 1
 asinList = []
-errorList = [['Parent-ASIN', 'Error']]
-errorCount = 0
-remainingRequests = 0
-
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
 
+with open('asins.csv', 'r') as f:
+    reader = csv.reader(f)
+
+    for asin in reader:
+        asinList.append(asin[0])
+
+def processAsins(asinList):
+    i = 1
+    x = len(asinList)
+    errorList = []
+
+    for asin in asinList:
+        try:
+            print("Processing ASIN " + asin)
+            getAsinData(asin)
+        except Exception as e:
+            print("Error on Parent ASIN: " + asin)
+            print("Error Message: " + str(e))
+            errorList.append([asin, str(e)])
+            pass
+        finally:
+            print("Processing Done on ASIN: " + asin + " | " + str(i) + " out of " + str(x) + "\n")
+
+            if (i == x):
+                handleErrors(errorList)
+
+            i += 1
+
 def getAsinData(asin):
-    global remainingRequests
-    
     handler = urlopen(url + asin)
     productData = json.loads(handler.read())
 
@@ -70,63 +91,28 @@ def getAsinData(asin):
     print("Adding Record to Database")
     collection.insert_one(product)
 
-def process(asinList):
-    global i
-    global errorCount
-    x = len(asinList)
-
-    for asin in asinList:
-        try:
-            print("Processing ASIN: " + asin[0])
-            getAsinData(asin[0])
-        except Exception as e:
-            errorCount += 1
-            print("Error on Parent ASIN: " + asin[0])
-            print("Error: " + str(e))
-            errorList.append([asin[0], str(e)])
-            pass
-        finally:
-            print("Processing Done on ASIN: " + asin[0] + " | " + str(i) + " out of " + str(x) + "\n")
-            if (i == x):
-                if (errorCount > 0):
-                    print(str(errorCount) + " Errors Caught")
-                    with open('errors.csv', 'w', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerows(errorList)
-                    print("Errors logged to errors.csv\n")
-                    errorAsk(errorList)
-                else:
-                    try:
-                        print("All items processed succesfully")
-                        os.remove('errors.csv')
-                    except:
-                        pass
-            i += 1
-
-def processErrors(errorList):
-    errorList.pop(0)
+def handleErrors(errorList):
     errorList = [(a) for a, b in errorList]
-    print(errorList)
-    process([errorList])
+    errorCount = len(errorList)
 
-def errorAsk(errorList):
-    choice = input("Would you like to retry the ASINs with Errors? (y/n): ")
-    if (choice == "y" or choice == "Y"):
-        processErrors(errorList)
-        i = 1
-    elif (choice == "n" or choice == "N"):
-        print("Ok, program completed")
+    if (errorCount > 0):
+        print(str(errorCount) + " Errors Caught")
+        with open('errors.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(errorList)
+        print("Errors logged to errors.csv\n")
+        choice = input("Would you like to retry the ASINs with Errors? (y/n): ")
+        if (choice == "y" or choice == "Y"):
+            processAsins(errorList)
+        elif (choice == "n" or choice == "N"):
+            print("Ok, program completed")
+        else:
+            print("Error: Invalid Input")
     else:
-        print("Error: Invalid Input")
-    
+        try:
+            print("All items processed succesfully")
+            os.remove('errors.csv')
+        except:
+            pass
 
-with open('asins.csv', 'r') as f:
-    reader = csv.reader(f)
-
-    for asin in reader:
-        asinList.append(asin)
-
-#To process all asins in csv
-process(asinList)
-#To process a single asin fot troubleshooting
-#process([["B0915KV169"]])
+processAsins(asinList)
