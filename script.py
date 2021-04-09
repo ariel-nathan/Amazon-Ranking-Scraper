@@ -2,6 +2,7 @@ import os
 import re
 import csv
 import json
+import pandas as pd
 from urllib.request import urlopen
 from config import apiToken, collection
 from datetime import date, datetime
@@ -9,11 +10,10 @@ from datetime import date, datetime
 asinList = []
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
 
-with open('asins.csv', 'r') as f:
-    reader = csv.reader(f)
+asins_csv = pd.read_csv('./asins.csv', names=["ASIN"])
 
-    for asin in reader:
-        asinList.append(asin[0])
+for asin in asins_csv['ASIN']:
+    asinList.append(asin)
 
 def processAsins(asinList):
     i = 1
@@ -115,4 +115,4 @@ def handleErrors(errorList):
         except:
             pass
 
-processAsins(asinList)
+# processAsins(asinList)
