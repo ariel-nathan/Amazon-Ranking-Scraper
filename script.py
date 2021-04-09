@@ -6,11 +6,18 @@ import pandas as pd
 from urllib.request import urlopen
 from config import apiToken, collection
 from datetime import date, datetime
+import tkinter as tk
+from tkinter import filedialog
+
+root = tk.Tk()
+root.withdraw()
+
+file_path = filedialog.askopenfilename(filetypes=[('csv','*.csv')])
 
 asinList = []
 url = 'https://api.proxycrawl.com/scraper?token=' + apiToken + '&url=https://amazon.com/dp/'
 
-asins_csv = pd.read_csv('./asins.csv', names=["ASIN"])
+asins_csv = pd.read_csv(file_path, names=["ASIN"])
 
 for asin in asins_csv['ASIN']:
     asinList.append(asin)
@@ -26,7 +33,14 @@ def processAsins(asinList):
             getAsinData(asin)
         except Exception as e:
             print("Error on Parent ASIN: " + asin)
-            print("Error Message: " + str(e))
+            if(str(e) == "local variable 'productRank' referenced before assignment"):
+                print("Error Message: " + str(e))
+                print("No Product Rank Found")
+            if(str(e) == "HTTP Error 520: CUSTOM"):
+                print("Error Message: " + str(e))
+                print("API Error")
+            else:
+                print("Error Message: " + str(e))
             errorList.append([asin, str(e)])
             pass
         finally:
