@@ -92,14 +92,14 @@ def getAsinData(asin):
     collection.insert_one(product)
 
 def handleErrors(errorList):
-    errorList = [(a) for a, b in errorList]
     errorCount = len(errorList)
 
     if (errorCount > 0):
         print(str(errorCount) + " Errors Caught")
         with open('errors.csv', 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerows(errorList)
+            for error in errorList:
+                writer.writerow(error)
         print("Errors logged to errors.csv\n")
         choice = input("Would you like to retry the ASINs with Errors? (y/n): ")
         if (choice == "y" or choice == "Y"):
@@ -115,4 +115,4 @@ def handleErrors(errorList):
         except:
             pass
 
-# processAsins(asinList)
+processAsins(asinList)
