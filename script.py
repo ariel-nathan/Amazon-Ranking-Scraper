@@ -36,7 +36,7 @@ def processAsins(asinList):
             if(str(e) == "local variable 'productRank' referenced before assignment"):
                 print("Error Message: " + str(e))
                 print("No Product Rank Found")
-            if(str(e) == "HTTP Error 520: CUSTOM"):
+            elif(str(e) == "HTTP Error 520: CUSTOM"):
                 print("Error Message: " + str(e))
                 print("API Error")
             else:
